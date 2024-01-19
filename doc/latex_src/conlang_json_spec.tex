@@ -1,0 +1,26 @@
+\documentclass[letterpaper,12pt]{report}
+\input{preamble}
+\graphicspath{ {./images/} }
+
+\begin{document}
+\title{Constructed Language (Conlang) JSON Document Specification}
+
+\maketitle
+\newpage
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+%\listoftables
+%\newpage
+%\listoffigures
+%\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\input{Specification}
+\newpage
+\printbibliography[
+heading=bibintoc,
+title={Bibliography}
+]
+\newpage
+\end{document}
