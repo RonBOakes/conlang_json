@@ -98,7 +98,18 @@ As described above, the keys in the derivational\_affix\_map are used when deriv
 	
 \end{itemize}
 
-
+\chapter{Lexicon Entries}
+As described above, the lexicon will be a list of objects.  Each object will have the following keys:
+\begin{itemize}
+	\item \textbf{phonetic}: Optional.  Required if \textbf{spelled} is not present. This string contains the phonetic representation of the word.  This will be expressed using the symbology specified in the \textbf{phonetic\_characters} field at the Top Level.
+	\item \textbf{spelled}: Optional. Required if \textbf{phonetic} is not present.  This string contains the Romanized or Latinized representation of the word.
+	\item \textbf{english}: Required. This string contains the English or other natural language equivalent to the word or its definition in English or another natural language.
+	\item \textbf{part\_of\_speech}: Required.  This string contains the part of speech for this word.  This can, and should, be one of the abbreviations found in the \textbf{part\_of\_speech\_list} field at the Top Level.
+	\item \textbf{declensions}: Required.  This array of strings contains the declensions used when declining this word from its root form.  If the word is not declined, that is, if it is the root word, this array must contain a single entry, the string ``root.''
+	\item \textbf{derived\_word}: Required.  This boolean is set to true if this word was created by deriving a root word using words in the \textbf{derived\_word\_list} with the aid of the affixes in the \textbf{derivation\_affix\_map}.
+	\item \textbf{declined\_word}: Required. This boolean is set to true if the word was created by declining a root word using the rules in the \textbf{affix\_map}.
+	\item \textbf{metadata}: Optionall, Recommended. This object contains an object where any program that edits the conlang object may add information regarding the word's history and its source.  There is no exact format specified for this.  Programs should not delete or alter metadata created by other programs but may add their own metadata or alter their metadata to update their content.  
+\end{itemize}
 
 
 
