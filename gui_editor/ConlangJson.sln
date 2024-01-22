@@ -5,12 +5,7 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConlangJson", "ConlangJson\ConlangJson.csproj", "{1F1225E1-249E-4F31-A806-7A37C34FFFEC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JsonLoadTest", "JsonLoadTest\JsonLoadTest.csproj", "{73D9E984-AFAB-4741-925E-4A6AC4F530F2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1F1225E1-249E-4F31-A806-7A37C34FFFEC} = {1F1225E1-249E-4F31-A806-7A37C34FFFEC}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageEditor", "LanguageEditor\LanguageEditor.csproj", "{48B9C040-D095-4EA1-92D2-572A7AC21A04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LanguageEditor", "LanguageEditor\LanguageEditor.csproj", "{48B9C040-D095-4EA1-92D2-572A7AC21A04}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1F1225E1-249E-4F31-A806-7A37C34FFFEC} = {1F1225E1-249E-4F31-A806-7A37C34FFFEC}
 	EndProjectSection
@@ -25,10 +20,6 @@ Global
 		{1F1225E1-249E-4F31-A806-7A37C34FFFEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F1225E1-249E-4F31-A806-7A37C34FFFEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F1225E1-249E-4F31-A806-7A37C34FFFEC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{73D9E984-AFAB-4741-925E-4A6AC4F530F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73D9E984-AFAB-4741-925E-4A6AC4F530F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{73D9E984-AFAB-4741-925E-4A6AC4F530F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{73D9E984-AFAB-4741-925E-4A6AC4F530F2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{48B9C040-D095-4EA1-92D2-572A7AC21A04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{48B9C040-D095-4EA1-92D2-572A7AC21A04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48B9C040-D095-4EA1-92D2-572A7AC21A04}.Release|Any CPU.ActiveCfg = Release|Any CPU
