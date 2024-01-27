@@ -38,6 +38,7 @@ namespace ConlangJson
         private List<string>? _noun_gender_list;
         private List<string>? _part_of_speech_list;
         private List<string>? _phoneme_inventory;
+        private Dictionary<string, string[]?>? _phonetic_inventory;
         private List<SoundMap>? _sound_map_list;
         private List<string>? _lexical_order_list;
         private Dictionary<string, List<Dictionary<string, List<Dictionary<string, Affix>>>>>? _affix_map;
@@ -60,9 +61,9 @@ namespace ConlangJson
             _metadata = [];
         }
 
-        public LanguageDescription(string? english_name, string? phonetic_characters, string? native_name_phonetic, string? native_name_english, List<string>? noun_gender_list, string? preferred_voice, 
-            string? preferred_language, bool? derived, bool? declined, List<string>? part_of_speech_list, List<string>? phoneme_inventory, List<SoundMap>? sound_map_list, 
-            List<string>? lexical_order_list, Dictionary<string, List<Dictionary<string, List<Dictionary<string, Affix>>>>>? affix_map, Dictionary<string, DerivationalAffix>? derivational_affix_map, 
+        public LanguageDescription(string? english_name, string? phonetic_characters, string? native_name_phonetic, string? native_name_english, List<string>? noun_gender_list, string? preferred_voice,
+            string? preferred_language, bool? derived, bool? declined, List<string>? part_of_speech_list, List<string>? phoneme_inventory, List<SoundMap>? sound_map_list,
+            List<string>? lexical_order_list, Dictionary<string, List<Dictionary<string, List<Dictionary<string, Affix>>>>>? affix_map, Dictionary<string, DerivationalAffix>? derivational_affix_map,
             List<LexiconEntry> lexicon, List<string>? derived_word_list, JsonObject metadata)
         {
             _english_name = english_name;
@@ -88,13 +89,13 @@ namespace ConlangJson
             get => _english_name;
             set => _english_name = value;
         }
-        
+
         public string? phonetic_characters
         {
             get => _phonetic_characters;
             set => _phonetic_characters = value;
         }
-        
+
         public string? native_name_phonetic
         {
             get => _native_name_phonetic;
@@ -121,13 +122,13 @@ namespace ConlangJson
 
         public bool? derived
         {
-            get => _derived; 
+            get => _derived;
             set => _derived = value;
         }
 
         public bool? declined
         {
-            get => _declined; 
+            get => _declined;
             set => _declined = value;
         }
 
@@ -147,6 +148,12 @@ namespace ConlangJson
         {
             get => _phoneme_inventory ?? [];
             set => _phoneme_inventory = value;
+        }
+
+        public Dictionary<string, string[]?> phonetic_inventory
+        {
+            get => _phonetic_inventory ?? new Dictionary<string, string[]?>();
+            set => _phonetic_inventory = value;
         }
 
         public List<SoundMap> sound_map_list
