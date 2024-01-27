@@ -31,7 +31,7 @@ import sys
 import re
 from argparse import ArgumentParser
 from lexicon_entry import LEXICON_ENTRY
-from conlang_lib import spell_word, derive_words, dedup_lexicon, decline_word, get_number_word
+from conlang_lib import spell_word, derive_words, dedup_lexicon, decline_word, get_number_word, get_ipa_symbol_map
 
 # Define the global patterns for matching consonants and vowels.
 IPA_VOWELS_PATTERN = "[aioeu\u032f\u02d0]"
@@ -163,6 +163,9 @@ def main(argv):
     
     # Get the phoneme inventory
     phoneme_inventory = get_phoneme_inventory(vulgarlang)
+    
+    # Get the phonetic inventory
+    phonetic_inventory = parse_phonetic_inventory(vulgarlang)
         
     # Build the basic language structure.
     language_structure = {
@@ -186,6 +189,7 @@ def main(argv):
     language_structure['noun_gender_list'] = noun_gender_list
     language_structure['part_of_speech_list'] = sorted(list(part_of_speech_set))
     language_structure['phoneme_inventory'] = phoneme_inventory
+    language_structure['phonetic_inventory'] = phonetic_inventory
     language_structure['sound_map_list'] = sound_map_list
     language_structure['lexical_order_list'] = lexical_order_list
     language_structure['affix_map'] = affix_map
@@ -1150,6 +1154,54 @@ def parse_affix_rule(affix_rule,sound_map_list,patterns):
     return affix_type, map_entry
 
 #end def parse_affix_rules
+
+# Parse the customConsonants, customVowels, wordInitialConsonants, midWordConsonants, wordFinalConsonants, bwsVowels, and bws2ndVowels
+# into the Conlang JSON structure phonetic_inventory structure.
+def parse_phonetic_inventory(vulgarlang):
+    ipa_symbol_map = get_ipa_symbol_map()
+
+    p_consonants = []
+    np_consonants = []
+    vowels = []
+    v_dipthongs = []
+    
+    for consonant in vulgarlang['customConsonants']['value'].split():
+        if consonant in ipa_symbol_map['p_consonants']:
+            p_consonants.append(consonant)
+        elif consonant in ipa_symbol_map['np_consonants']:
+            np_consonants.append(consonant)
+        else:
+            print("Warning consonant " + consonant + " is not pulmonic or non-plumonic, and is not getting inventoried")
+            
+    for vowel in vulgarlang['customVowels']['value'].split():
+        if len(vowel) == 1:
+            if vowel in ipa_symbol_map['vowels']:
+                vowels.append(vowel)
+            else:
+                print("Warning vowel " + vowel + " is not in a valid IPA vowel, and is not getting inventoried");
+        else:
+            if (len(vowel) == 2) and ((vowel[1] == '\u02d0') or (vowel[1] == '\u02d1') or (vowel[1] == '\u02de') or (vowel[1] == '\u032f')):
+                # A single vowel followed by a long, half-long, rhotacized, or short (Vulgarlang)
+                if vowel[0] in ipa_symbol_map['vowels']:
+                    vowels.append(vowel)
+                else:
+                    print("Warning vowel " + vowel + " is not in a valid IPA vowel, and is not getting inventoried");
+            # For now, put everything else into v_dipthongs -- probably naive.
+            else:
+                v_dipthongs.append(vowel)
+                
+    phonetic_inventory = {
+        'p_consonants':p_consonants,
+        'np_consonants':np_consonants,
+        'vowels':vowels,
+        'v_dipthongs':v_dipthongs,
+    }
+    
+    print(phonetic_inventory)
+    
+    return phonetic_inventory
+
+#end parse_phonetic_inventory
         
 # Call the main function.
 if __name__ == "__main__":
