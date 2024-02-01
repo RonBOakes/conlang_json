@@ -738,29 +738,30 @@ def parse_grammar_rules(grammar,part_of_speech_set,sound_map_list,patterns):
                                 for entry in working_affix_map[affix]:
                                     #entry is a map with a single key
                                     particle_declension = list(entry.keys())[0]
-                                    if 'pronounciation_regex' in entry[particle_declension]:
-                                        if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
-                                            particle_declension = "Vowel " + particle_declension
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
-                                                                                  entry[particle_declension]['t_spelling_add'],
-                                                                                  "<"+particle_declension+" Particle>","Special",[particle_declension]))
-                                            particle_declension = "Consonant " + particle_declension
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
-                                                                                  entry[particle_declension]['f_spelling_add'],
-                                                                                  "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                    if (entry[particle_declension]): # Test to see if there is anything in the map, otherwise don't add a particle
+                                        if 'pronounciation_regex' in entry[particle_declension]:
+                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
+                                                particle_declension = "Vowel " + particle_declension
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                                                    entry[particle_declension]['t_spelling_add'],
+                                                                                    "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                                particle_declension = "Consonant " + particle_declension
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                                                    entry[particle_declension]['f_spelling_add'],
+                                                                                    "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                            else:
+                                                particle_declension = "Consonant " + particle_declension
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                                                    entry[particle_declension]['t_spelling_add'],
+                                                                                    "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                                particle_declension = "Vowel " + particle_declension
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                                                    entry[particle_declension]['f_spelling_add'],
+                                                                                    "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                         else:
-                                            particle_declension = "Consonant " + particle_declension
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
-                                                                                  entry[particle_declension]['t_spelling_add'],
-                                                                                  "<"+particle_declension+" Particle>","Special",[particle_declension]))
-                                            particle_declension = "Vowel " + particle_declension
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
-                                                                                  entry[particle_declension]['f_spelling_add'],
-                                                                                  "<"+particle_declension+" Particle>","Special",[particle_declension]))
-                                    else:
-                                        lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
-                                                                              entry[particle_declension]['spelling_add'],
-                                                                              "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
+                                                                                entry[particle_declension]['spelling_add'],
+                                                                                "<"+particle_declension+" Particle>","Special",[particle_declension]))
                 working_affix_map = {}
                 line_parts = line.split('=')
                 table_type = line_parts[1].strip()
@@ -852,29 +853,30 @@ def parse_grammar_rules(grammar,part_of_speech_set,sound_map_list,patterns):
                                 for entry in working_affix_map[affix]:
                                     #entry is a map with a single key
                                     particle_declension = list(entry.keys())[0]
-                                    if 'pronounciation_regex' in entry[particle_declension]:
-                                        if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
-                                            particle_declension = "Vowel " + particle_declension
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
-                                                                                  entry[particle_declension]['t_spelling_add'],
-                                                                                  "<"+particle_declension+" Particle>","Special",[particle_declension]))
-                                            particle_declension = "Consonant " + particle_declension
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
-                                                                                  entry[particle_declension]['f_spelling_add'],
-                                                                                  "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                    if(entry[particle_declension]):
+                                        if 'pronounciation_regex' in entry[particle_declension]:
+                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
+                                                particle_declension = "Vowel " + particle_declension
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                                                    entry[particle_declension]['t_spelling_add'],
+                                                                                    "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                                particle_declension = "Consonant " + particle_declension
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                                                    entry[particle_declension]['f_spelling_add'],
+                                                                                    "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                            else:
+                                                particle_declension = "Consonant " + particle_declension
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                                                    entry[particle_declension]['t_spelling_add'],
+                                                                                    "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                                particle_declension = "Vowel " + particle_declension
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                                                    entry[particle_declension]['f_spelling_add'],
+                                                                                    "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                         else:
-                                            particle_declension = "Consonant " + particle_declension
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
-                                                                                  entry[particle_declension]['t_spelling_add'],
-                                                                                  "<"+particle_declension+" Particle>","Special",[particle_declension]))
-                                            particle_declension = "Vowel " + particle_declension
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
-                                                                                  entry[particle_declension]['f_spelling_add'],
-                                                                                  "<"+particle_declension+" Particle>","Special",[particle_declension]))
-                                    else:
-                                        lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
-                                                                              entry[particle_declension]['spelling_add'],
-                                                                              "<"+particle_declension+" Particle>","Special",[particle_declension]))
+                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
+                                                                                entry[particle_declension]['spelling_add'],
+                                                                                "<"+particle_declension+" Particle>","Special",[particle_declension]))
                     working_affix_map = {}
                     declension_map = {}
                     last_affix_type = 'TBD'
@@ -1163,7 +1165,7 @@ def parse_phonetic_inventory(vulgarlang):
     p_consonants = []
     np_consonants = []
     vowels = []
-    v_dipthongs = []
+    v_diphthongs = []
     
     for consonant in vulgarlang['customConsonants']['value'].split():
         if consonant in ipa_symbol_map['p_consonants']:
@@ -1186,15 +1188,15 @@ def parse_phonetic_inventory(vulgarlang):
                     vowels.append(vowel)
                 else:
                     print("Warning vowel " + vowel + " is not in a valid IPA vowel, and is not getting inventoried");
-            # For now, put everything else into v_dipthongs -- probably naive.
+            # For now, put everything else into v_diphthongs -- probably naive.
             else:
-                v_dipthongs.append(vowel)
+                v_diphthongs.append(vowel)
                 
     phonetic_inventory = {
         'p_consonants':p_consonants,
         'np_consonants':np_consonants,
         'vowels':vowels,
-        'v_dipthongs':v_dipthongs,
+        'v_diphthongs':v_diphthongs,
     }
     
     print(phonetic_inventory)
