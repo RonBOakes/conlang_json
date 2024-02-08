@@ -175,7 +175,7 @@ def main(argv):
                             'native_name_english':spell_word(vulgarlang['ipaLangName']['value'].strip(), sound_map_list).capitalize(),
                          }
     if arguments.voice:
-        language_structure['preferred_voice'] = arguments.voice
+        language_structure['preferred_voice'] = {'Polly':arguments.voice }
     if arguments.language:
         language_structure['preferred_language'] = arguments.language
     if arguments.derive:
