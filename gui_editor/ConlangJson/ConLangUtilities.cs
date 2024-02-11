@@ -31,8 +31,20 @@ using System.Text.Json;
 
 namespace ConlangJson
 {
+    /// <summary>
+    /// A collection of static utility methods used with the ConlangJson objects.
+    /// </summary>
     public static class ConLangUtilities
     {
+        /// <summary>
+        /// Spell a word - Convert its phonetic representation into a Romanized or Latinized
+        /// representation.
+        /// </summary>
+        /// <param name="phonetic">Phonetic representation of a word using IPA.</param>
+        /// <param name="soundMapList">The SoundMapList (sound_map_list) from the Language.  
+        /// This must be ordered so that processing from the first to the last element will 
+        /// produce the correct spelling.</param>
+        /// <returns>The Romanized or Latinized version of the word.</returns>
         public static string SpellWord(string phonetic, List<SoundMap> soundMapList)
         {
             string spelled = phonetic;
@@ -44,6 +56,15 @@ namespace ConlangJson
             return spelled;
         }
 
+        /// <summary>
+        /// Sound out a word - Convert its Romanized or Latinized form into a phonetic
+        /// form in IPA.
+        /// </summary>
+        /// <param name="word">The Romanized or Latinized version of the word.</param>
+        /// <param name="soundMapList">The SoundMapList (sound_map_list) from the Language.  
+        /// This must be ordered so that processing from the last to the first element will 
+        /// produce the correct phonetic representation.</param>
+        /// <returns>The phonetic representation of the word in IPA.</returns>
         public static string SoundOutWord(string word, List<SoundMap> soundMapList)
         {
             string phonetic = word;
@@ -55,10 +76,22 @@ namespace ConlangJson
             return phonetic;
         }
 
-        /**
-         * Decline a word
-         */
-        public static List<LexiconEntry> DeclineWord(LexiconEntry word, Dictionary<string, List<Dictionary<string, List<Dictionary<string, Affix>>>>> affixMap, List<SoundMap> soundMapList, bool derivedWord = false)
+        /// <summary>
+        /// Decline a single word
+        /// </summary>
+        /// <param name="word">LexiconEntry for the word to be declined</param>
+        /// <param name="affixMap">AffixMap (affix_map) from the language containing the word 
+        /// to be declined</param>
+        /// <param name="soundMapList">The SoundMapList (sound_map_list) from the Language.  
+        /// This must be ordered so that processing from the first to the last element will 
+        /// produce the correct spelling, and processing in the reverse order will produce
+        /// the correct pronunciation.</param>
+        /// <param name="derivedWord">Optional.  Set to true to indicate that the word being
+        /// declined is a derived word.</param>
+        /// <returns>A List of LexiconEntry objects containing the new words created by 
+        /// declining the word parameter according to the supplied AffixMap's rules.</returns>
+        public static List<LexiconEntry> DeclineWord(LexiconEntry word, Dictionary<string, List<Dictionary<string, List<Dictionary<string, Affix>>>>> affixMap, 
+            List<SoundMap> soundMapList, bool derivedWord = false)
         {
             // Safety check - never decline a word already marked as declined, or a word with
             // a source metadata entry
@@ -83,7 +116,7 @@ namespace ConlangJson
             {
                 derivedWord = (bool)word.derived_word;
             }
-            LexiconEntry wordSouceData = word.copy();
+            LexiconEntry wordSourceData = word.copy();
 
             // Search the affixMap for a matching part of speech.  If one is found then
             // there are rules for declining this part of speech, so apply them to this word,
@@ -114,7 +147,7 @@ namespace ConlangJson
                     newMetadata = new JsonObject();
                 }
                 JsonObject declinedWordData = new JsonObject();
-                string declinedWordDataString = JsonSerializer.Serialize<LexiconEntry>(wordSouceData);
+                string declinedWordDataString = JsonSerializer.Serialize<LexiconEntry>(wordSourceData);
                 declinedWordData.Add("declined_word", JsonSerializer.Deserialize<JsonObject>(declinedWordDataString));
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 if (newMetadata.ContainsKey("Source"))
@@ -123,14 +156,18 @@ namespace ConlangJson
                 }
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                 newMetadata.Add("Source", declinedWordData);
-                LexiconEntry lexent = new LexiconEntry(phoneticEntry.Phonetic, spelled,english,phoneticEntry.PartOfSpeech,phoneticEntry.Declensions,derivedWord,true,newMetadata);
-                lexent.declined_word = true;
-                lexiconFragment.Add(lexent);
+                LexiconEntry entry = new LexiconEntry(phoneticEntry.Phonetic, spelled,english,phoneticEntry.PartOfSpeech,phoneticEntry.Declensions,derivedWord,true,newMetadata);
+                entry.declined_word = true;
+                lexiconFragment.Add(entry);
             }
 
             return lexiconFragment;
         }
 
+        /// <summary>
+        /// Decline the complete Lexicon of the supplied language.
+        /// </summary>
+        /// <param name="language">Language to be declined.</param>
         public static void declineLexicon(LanguageDescription language)
         {
             List<LexiconEntry> addLexicon = new List<LexiconEntry>();
@@ -139,15 +176,15 @@ namespace ConlangJson
                 addLexicon.AddRange(DeclineWord(word, language.affix_map, language.sound_map_list));
             }
             language.lexicon.AddRange(addLexicon);
-            List<LexiconEntry> cleanLexicon = dedupLeixcon(language.lexicon);
-            if(cleanLexicon.Count <  language.lexicon.Count)
-            {
-                language.lexicon = cleanLexicon;
-            }
-            language.lexicon.Sort(new LexiconEntry.LexicalOrderCompSpelling());
+            List<LexiconEntry> cleanLexicon = deDuplicateLexicon(language.lexicon);
             language.declined = true;
         }
 
+        /// <summary>
+        /// Remove all of the entries in the supplied language's lexicon that were created
+        /// as the result of a programmatic declension of the language.  
+        /// </summary>
+        /// <param name="language">Language to have its declined words removed from the lexicon</param>
         public static void removeDeclinedEntries(LanguageDescription language) 
         {
             List<LexiconEntry> cleanLexicon = new List<LexiconEntry>();
@@ -167,7 +204,12 @@ namespace ConlangJson
             language.declined = false;
         }
 
-        public static List<LexiconEntry> dedupLeixcon(List<LexiconEntry> lexicon)
+        /// <summary>
+        /// Remove any duplicate entries in the supplied Lexicon.<br/>This method is slow.
+        /// </summary>
+        /// <param name="lexicon">List of LexiconEntry objects.</param>
+        /// <returns>A list of LexiconEntry objects with any duplicates removed.</returns>
+        public static List<LexiconEntry> deDuplicateLexicon(List<LexiconEntry> lexicon)
         {
             List<LexiconEntry> newLexicon = new List<LexiconEntry>();
             foreach(LexiconEntry lexiconEntry in lexicon) 
@@ -204,7 +246,7 @@ namespace ConlangJson
                 }
                 else
                 {
-                    throw new ArgumentException("Invlid Argument in NewWordData.Equals");
+                    throw new ArgumentException("Invalid Argument in NewWordData.Equals");
                 }
             }
 
@@ -256,7 +298,7 @@ namespace ConlangJson
                 return phoneticList;
             }
 
-            // Remove the emphisys mark off the beginning of the phonetic string.
+            // Remove the emphasis mark off the beginning of the phonetic string.
             string phonetic2;
             if (phonetic.Substring(0, 1).Equals("ˈ"))
             {
@@ -274,7 +316,7 @@ namespace ConlangJson
                 Affix rules = entry[declension];
 
                 string? newWord = null;
-                // Perform the subsitution if there is a regular expression in the affix rule
+                // Perform the substitution if there is a regular expression in the affix rule
                 if (rules.pronounciation_regex != null)
                 {
                     if (affix.Equals("prefix"))
@@ -347,12 +389,12 @@ namespace ConlangJson
             List<NewWordData> phoneticList = new List<NewWordData>();
 
             List<List<Dictionary<string, List<Dictionary<string, Affix>>>>> affixMapCombos = allCombinations(affixMapList);
-            foreach (List<Dictionary<string, List<Dictionary<string, Affix>>>> affixMapTupple in affixMapCombos)
+            foreach (List<Dictionary<string, List<Dictionary<string, Affix>>>> affixMapTuple in affixMapCombos)
             {
-                phoneticList.AddRange(ProcessAffixMapTuple(affixMapTupple, phonetic, partOfSpeech));
+                phoneticList.AddRange(ProcessAffixMapTuple(affixMapTuple, phonetic, partOfSpeech));
             }
 
-            phoneticList = dedupPhoneticList(phoneticList);
+            phoneticList = deDuplicatePhoneticList(phoneticList);
 
             return phoneticList;
         }
@@ -373,7 +415,7 @@ namespace ConlangJson
             return allCombos;
         }
 
-        private static List<NewWordData> dedupPhoneticList(List<NewWordData> phoneticList)
+        private static List<NewWordData> deDuplicatePhoneticList(List<NewWordData> phoneticList)
         {
             List<NewWordData> newPhoneticList = new List<NewWordData>();
             foreach (NewWordData entry in phoneticList)
@@ -459,7 +501,7 @@ namespace ConlangJson
             {
                 return false;
             }
-            // Asumption: neither list will have duplicate entries - safe for our needs here.
+            // Assumption: neither list will have duplicate entries - safe for our needs here.
             int matchCount = 0;
             foreach (T t in one)
             {
