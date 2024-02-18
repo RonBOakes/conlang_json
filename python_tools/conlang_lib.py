@@ -93,27 +93,27 @@ def process_affix_map_tuple(affix_map_tuple,phonetic,part_of_speech,prior_declen
         rules = entry[declension]
         
         # Perform the substitution if there is a regular expression in the affix rule.
-        if 'pronounciation_regex' in rules.keys():
+        if 'pronunciation_regex' in rules.keys():
             if affix == 'prefix':
-                if re.match(rules['pronounciation_regex'],phonetic):
-                    new_word = rules['t_pronounciation_add'] + phonetic2
+                if re.match(rules['pronunciation_regex'],phonetic):
+                    new_word = rules['t_pronunciation_add'] + phonetic2
                 else:
-                    new_word = rules['f_pronounciation_add'] + phonetic2
+                    new_word = rules['f_pronunciation_add'] + phonetic2
             elif affix == 'suffix':
-                if re.match(rules['pronounciation_regex'],phonetic):
-                    new_word = phonetic2 + rules['t_pronounciation_add']
+                if re.match(rules['pronunciation_regex'],phonetic):
+                    new_word = phonetic2 + rules['t_pronunciation_add']
                 else:
-                    new_word = phonetic2 +rules['f_pronounciation_add']
+                    new_word = phonetic2 +rules['f_pronunciation_add']
             elif affix == 'replacement':
-                replacement = rules['pronounciation_repl'].replace('$','\\')
-                match = re.match(rules['pronounciation_regex'],phonetic2)
-                new_word = re.sub(rules['pronounciation_regex'],replacement,phonetic2)
+                replacement = rules['pronunciation_replacement'].replace('$','\\')
+                match = re.match(rules['pronunciation_regex'],phonetic2)
+                new_word = re.sub(rules['pronunciation_regex'],replacement,phonetic2)
         # If no regex, stick the new text on the correct end.
-        elif 'pronounciation_add' in rules.keys():
+        elif 'pronunciation_add' in rules.keys():
             if affix == 'prefix':
-                new_word = rules['pronounciation_add'] + phonetic2
+                new_word = rules['pronunciation_add'] + phonetic2
             else:
-                    new_word = phonetic2 +rules['pronounciation_add']
+                    new_word = phonetic2 +rules['pronunciation_add']
         # If we get here, we should be a particle which we punted out above, but put the new word in anyway.
         elif not bool(rules):
             new_word = phonetic
@@ -308,22 +308,22 @@ def derive_words(derived_word_list,derivational_affix_map,lexicon,affix_map,soun
             # Build the derived word's phonetic representation.
             phonetic_part = lex_entry.phonetic
             if rule_affix_data:
-                if 'pronounciation_regex' in rule_affix_data.keys():
-                    if re.match(rule_affix_data['pronounciation_regex'],phonetic_part):
+                if 'pronunciation_regex' in rule_affix_data.keys():
+                    if re.match(rule_affix_data['pronunciation_regex'],phonetic_part):
                         if rule_affix_data['type'] == 'PREFIX':
-                            phonetic_part = rule_affix_data['t_pronounciation_add'] + phonetic_part
+                            phonetic_part = rule_affix_data['t_pronunciation_add'] + phonetic_part
                         else:
-                            phonetic_part = phonetic_part + rule_affix_data['t_pronounciation_add']
+                            phonetic_part = phonetic_part + rule_affix_data['t_pronunciation_add']
                     else:
                         if rule_affix_data['type'] == 'PREFIX':
-                            phonetic_part = rule_affix_data['f_pronounciation_add'] + phonetic_part
+                            phonetic_part = rule_affix_data['f_pronunciation_add'] + phonetic_part
                         else:
-                            phonetic_part = phonetic_part + rule_affix_data['f_pronounciation_add']
-                elif 'pronounciation_add' in rule_affix_data.keys():
+                            phonetic_part = phonetic_part + rule_affix_data['f_pronunciation_add']
+                elif 'pronunciation_add' in rule_affix_data.keys():
                     if rule_affix_data['type'] == 'PREFIX':
-                        phonetic_part = rule_affix_data['pronounciation_add'] + phonetic_part
+                        phonetic_part = rule_affix_data['pronunciation_add'] + phonetic_part
                     else:
-                        phonetic_part = phonetic_part + rule_affix_data['pronounciation_add']
+                        phonetic_part = phonetic_part + rule_affix_data['pronunciation_add']
                     
 
             phonetic += phonetic_part

@@ -49,6 +49,8 @@ def main(argv):
         help='Vulgarlang save file to be parsed')
     cli.add_argument("-v","--voice", type=str, required=False, dest="voice", 
         help='Amazon Polly Voice preferred for speaking this conlang')
+    cli.add_argument("--espeak-language", type=str, required=False, dest="espeak_language",
+        help='espeak-ng "voice" which is actually the language code')
     cli.add_argument("-l","--language", type=str, required=False, dest="language",
         help='Language which should be used to select the phonetics when speaking this language')
     cli.add_argument("-o","--output", type=str, required=True, metavar="FILE_PATH", dest="outputfile",
@@ -169,14 +171,14 @@ def main(argv):
         
     # Build the basic language structure.
     language_structure = {
+                            'version':1.0,
                             'english_name':vulgarlang['anglicizedName']['value'].strip(),
                             'phonetic_characters':'ipa',
                             'native_name_phonetic':vulgarlang['ipaLangName']['value'].strip(),
                             'native_name_english':spell_word(vulgarlang['ipaLangName']['value'].strip(), sound_map_list).capitalize(),
                          }
     if arguments.voice:
-        language_structure['preferred_voice'] = arguments.voice
-        language_structure['preferred_voices'] = {'Polly':arguments.voice }
+        language_structure['preferred_voices'] = {'Polly':arguments.voice,'espeak-ng':arguments.espeak_language }
     if arguments.language:
         language_structure['preferred_language'] = arguments.language
     if arguments.derive:
@@ -286,8 +288,8 @@ def parse_spelling_rules(spelling_rule_list):
     # Initialize the sound map list with two default entries. 
     # These are the syllable separators.
     sound_map_list = []
-    sound_map_list.append({'phoneme':'ˈ','romanization':'','spelling_regex':'ˈ','pronounciation_regex':'&&&&&&'})
-    sound_map_list.append({'phoneme':'ˌ','romanization':'','spelling_regex':'ˌ','pronounciation_regex':'&&&&&&'})
+    sound_map_list.append({'phoneme':'ˈ','romanization':'','spelling_regex':'ˈ','pronunciation_regex':'&&&&&&'})
+    sound_map_list.append({'phoneme':'ˌ','romanization':'','spelling_regex':'ˌ','pronunciation_regex':'&&&&&&'})
     
     # Parse each spelling rule in turn and add it to the list.  
     # It is important to preserve the order since both Vulgarlang and the 
@@ -304,8 +306,8 @@ def parse_spelling_rules(spelling_rule_list):
     
     # Perform a number of global substitutions on the rules to replace 'C' and 'V' with the actual patterns.
     for sound_map in sound_map_list:
-        sound_map['pronounciation_regex'] = re.sub('C',SPELLING_CONSONANT_PATTERN, sound_map['pronounciation_regex'])
-        sound_map['pronounciation_regex'] = re.sub('V',SPELLING_VOWEL_PATTERN, sound_map['pronounciation_regex'])
+        sound_map['pronunciation_regex'] = re.sub('C',SPELLING_CONSONANT_PATTERN, sound_map['pronunciation_regex'])
+        sound_map['pronunciation_regex'] = re.sub('V',SPELLING_VOWEL_PATTERN, sound_map['pronunciation_regex'])
         sound_map['romanization'] = re.sub('C',SPELLING_CONSONANT_PATTERN, sound_map['romanization'])
         sound_map['romanization'] = re.sub('V',SPELLING_VOWEL_PATTERN, sound_map['romanization'])
         sound_map['spelling_regex'] = re.sub('C',IPA_CONSONANT_PATTERN, sound_map['spelling_regex'])
@@ -344,7 +346,7 @@ def parse_spelling_rule(spelling_rule):
                 'phoneme':'$1'+group_repl_match1.group(2),
                 'romanization':'$1$1',
                 'spelling_regex':r'('+group_repl_match1.group(1)+r')'+group_repl_match1.group(2),
-                'pronounciation_regex':r'('+group_repl_match1.group(1)+r')\1'
+                'pronunciation_regex':r'('+group_repl_match1.group(1)+r')\1'
             }
             sound_map_list.append(sound_map)
         elif group_repl_match2:
@@ -352,7 +354,7 @@ def parse_spelling_rule(spelling_rule):
                 'phoneme':'$1'+group_repl_match2.group(2),
                 'romanization':'$1'+group_repl_match2.group(3),
                 'spelling_regex':r'('+group_repl_match2.group(1)+r')'+group_repl_match2.group(2),
-                'pronounciation_regex':r'('+group_repl_match2.group(1)+r')'+group_repl_match2.group(3)
+                'pronunciation_regex':r'('+group_repl_match2.group(1)+r')'+group_repl_match2.group(3)
             }
             sound_map_list.append(sound_map)
         else:
@@ -396,7 +398,7 @@ def parse_spelling_rule(spelling_rule):
                 else:
                     sound_map = {'phoneme':phoneme,'romanization':roman}
                     sound_map['spelling_regex']=sound_map['phoneme']
-                    sound_map['pronounciation_regex']=sound_map['romanization']
+                    sound_map['pronunciation_regex']=sound_map['romanization']
                 #print ("\t",end="")
                 #print(sound_map)
                 sound_map_list.append(sound_map)
@@ -419,12 +421,12 @@ def parse_sound_change(phoneme,roman,sound_change):
         phoneme = match1.group(1) + r'$1'
         roman = match2.group(1) + r'$1' + match2.group(3)
         spelling_regex = match1.group(1) + '(' + match1.group(2) + ')'
-        pronounciation_regex = match2.group(1) + '(' + match2.group(2) + ')' + match2.group(3)
+        pronunciation_regex = match2.group(1) + '(' + match2.group(2) + ')' + match2.group(3)
         return {
                 'phoneme':phoneme,
                 'romanization':roman,
                 'spelling_regex':spelling_regex,
-                'pronounciation_regex':pronounciation_regex
+                'pronunciation_regex':pronunciation_regex
                }
 
     if sound_change == '#_':
@@ -432,7 +434,7 @@ def parse_sound_change(phoneme,roman,sound_change):
                 'phoneme':phoneme,
                 'romanization':roman,
                 'spelling_regex':'^'+phoneme,
-                'pronounciation_regex':'^'+roman
+                'pronunciation_regex':'^'+roman
                }
                
     if sound_change == '_#':
@@ -440,7 +442,7 @@ def parse_sound_change(phoneme,roman,sound_change):
                 'phoneme':phoneme,
                 'romanization':roman,
                 'spelling_regex':phoneme+'$',
-                'pronounciation_regex':roman+'$'
+                'pronunciation_regex':roman+'$'
                }
 
     if sound_change == '#_#':
@@ -448,7 +450,7 @@ def parse_sound_change(phoneme,roman,sound_change):
                 'phoneme':phoneme,
                 'romanization':roman,
                 'spelling_regex':'^'+phoneme+'$',
-                'pronounciation_regex':'^'+roman+'$'
+                'pronunciation_regex':'^'+roman+'$'
                }
 
     if sound_change == 'C_':
@@ -456,7 +458,7 @@ def parse_sound_change(phoneme,roman,sound_change):
                 'phoneme':'$1'+phoneme,
                 'romanization':'$1'+roman,
                 'spelling_regex':'(C)'+phoneme,
-                'pronounciation_regex':'(C)'+roman
+                'pronunciation_regex':'(C)'+roman
                }
 
     if sound_change == 'C_#':
@@ -464,7 +466,7 @@ def parse_sound_change(phoneme,roman,sound_change):
                 'phoneme':phoneme,
                 'romanization':roman,
                 'spelling_regex':'C'+phoneme+'$',
-                'pronounciation_regex':'C'+roman+'$'
+                'pronunciation_regex':'C'+roman+'$'
                }
                
     if sound_change == 'VV':
@@ -472,42 +474,42 @@ def parse_sound_change(phoneme,roman,sound_change):
                 'phoneme':'$1',
                 'romanization':'$1$1',
                 'spelling_regex':r'(V)',
-                'pronounciation_regex':r'(V)\1'
+                'pronunciation_regex':r'(V)\1'
                }
 
 
     match = re.match(r'_(\S+)',sound_change)
     if match:
         spelling_regex = phoneme + match.group(1)
-        pronounciation_regex = roman + match.group(1)
+        pronunciation_regex = roman + match.group(1)
         return {
                 'phoneme':phoneme,
                 'romanization':roman,
                 'spelling_regex':spelling_regex,
-                'pronounciation_regex':pronounciation_regex
+                'pronunciation_regex':pronunciation_regex
                }
         
     match = re.match(r'!_{(\S+)}',sound_change)
     if match:
         sounds = match.group(1).split(',')
         spelling_regex = phoneme + '([^' + ''.join(sounds) + '])'
-        pronounciation_regex = roman + '([^' + ''.join(sounds) + '])'
+        pronunciation_regex = roman + '([^' + ''.join(sounds) + '])'
         return {
                 'phoneme':phoneme+'$1',
                 'romanization':roman+'$1',
                 'spelling_regex':spelling_regex,
-                'pronounciation_regex':pronounciation_regex
+                'pronunciation_regex':pronunciation_regex
                }
         
     match = re.match(r'(\S+)_#',sound_change)
     if match:
         spelling_regex = match.group(1) + phoneme + '$'
-        pronounciation_regex = match.group(1) + roman + '$'
+        pronunciation_regex = match.group(1) + roman + '$'
         return {
                 'phoneme':match.group(1) + phoneme,
                 'romanization':match.group(1) + roman,
                 'spelling_regex':spelling_regex,
-                'pronounciation_regex':pronounciation_regex
+                'pronunciation_regex':pronunciation_regex
                }
         
     print("Unmatched sound_change pattern: " + sound_change)
@@ -598,11 +600,11 @@ def parse_derivational_affix_list(derivational_affix_list,sound_map_list,pattern
             f_spelling_add = spell_word(vowel_prefix_match.group(2),sound_map_list)
             map_entry = {
                 'type':'PREFIX',
-                'pronounciation_regex':'^'+IPA_VOWELS_PATTERN,
+                'pronunciation_regex':'^'+IPA_VOWELS_PATTERN,
                 'spelling_regex':'^'+SPELLING_VOWEL_PATTERN,
-                't_pronounciation_add':vowel_prefix_match.group(1),
+                't_pronunciation_add':vowel_prefix_match.group(1),
                 't_spelling_add':t_spelling_add,
-                'f_pronounciation_add':vowel_prefix_match.group(2),
+                'f_pronunciation_add':vowel_prefix_match.group(2),
                 'f_spelling_add':f_spelling_add
             }
         elif vowel_suffix_match:
@@ -610,11 +612,11 @@ def parse_derivational_affix_list(derivational_affix_list,sound_map_list,pattern
             f_spelling_add = spell_word(vowel_suffix_match.group(2),sound_map_list)
             map_entry = {
                 'type':'SUFFIX',
-                'pronounciation_regex':IPA_VOWELS_PATTERN+'$',
+                'pronunciation_regex':IPA_VOWELS_PATTERN+'$',
                 'spelling_regex':SPELLING_VOWEL_PATTERN+'$',
-                't_pronounciation_add':vowel_suffix_match.group(1),
+                't_pronunciation_add':vowel_suffix_match.group(1),
                 't_spelling_add':t_spelling_add,
-                'f_pronounciation_add':vowel_suffix_match.group(2),
+                'f_pronunciation_add':vowel_suffix_match.group(2),
                 'f_spelling_add':f_spelling_add
             }
         elif consonant_prefix_match:
@@ -622,11 +624,11 @@ def parse_derivational_affix_list(derivational_affix_list,sound_map_list,pattern
             f_spelling_add = spell_word(consonant_prefix_match.group(2),sound_map_list)
             map_entry = {
                 'type':'PREFIX',
-                'pronounciation_regex':'^'+IPA_CONSONANT_PATTERN,
+                'pronunciation_regex':'^'+IPA_CONSONANT_PATTERN,
                 'spelling_regex':'^'+SPELLING_CONSONANT_PATTERN,
-                't_pronounciation_add':consonant_prefix_match.group(1),
+                't_pronunciation_add':consonant_prefix_match.group(1),
                 't_spelling_add':t_spelling_add,
-                'f_pronounciation_add':consonant_prefix_match.group(2),
+                'f_pronunciation_add':consonant_prefix_match.group(2),
                 'f_spelling_add':f_spelling_add
             }
         elif consonant_suffix_match:
@@ -634,23 +636,23 @@ def parse_derivational_affix_list(derivational_affix_list,sound_map_list,pattern
             f_spelling_add = spell_word(consonant_suffix_match.group(2),sound_map_list)
             map_entry = {
                 'type':'SUFFIX',
-                'pronounciation_regex':IPA_CONSONANT_PATTERN+'$',
+                'pronunciation_regex':IPA_CONSONANT_PATTERN+'$',
                 'spelling_regex':SPELLING_CONSONANT_PATTERN+'$',
-                't_pronounciation_add':consonant_suffix_match.group(1),
+                't_pronunciation_add':consonant_suffix_match.group(1),
                 't_spelling_add':t_spelling_add,
-                'f_pronounciation_add':consonant_suffix_match.group(2),
+                'f_pronunciation_add':consonant_suffix_match.group(2),
                 'f_spelling_add':f_spelling_add
             }
         elif prefix_match:
             map_entry = {
                 'type':'PREFIX',
-                'pronounciation_add':prefix_match.group(1),
+                'pronunciation_add':prefix_match.group(1),
                 'spelling_add':spell_word(prefix_match.group(1),sound_map_list),
             }
         elif suffix_match:
             map_entry = {
                 'type':'SUFFIX',
-                'pronounciation_add':suffix_match.group(1),
+                'pronunciation_add':suffix_match.group(1),
                 'spelling_add':spell_word(suffix_match.group(1),sound_map_list),
             }
         else:
@@ -706,27 +708,27 @@ def parse_grammar_rules(grammar,part_of_speech_set,sound_map_list,patterns):
                                     for entry in working_affix_map[affix]:
                                         #entry is a map with a single key
                                         particle_declension = list(entry.keys())[0]
-                                        if 'pronounciation_regex' in entry[particle_declension]:
-                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
+                                        if 'pronunciation_regex' in entry[particle_declension]:
+                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronunciation_regex']:
                                                 particle_declension = "Vowel " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                                       entry[particle_declension]['t_spelling_add'],
                                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                                 particle_declension = "Consonant " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                                       entry[particle_declension]['f_spelling_add'],
                                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                             else:
                                                 particle_declension = "Consonant " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                                       entry[particle_declension]['t_spelling_add'],
                                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                                 particle_declension = "Vowel " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                                       entry[particle_declension]['f_spelling_add'],
                                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                         else:
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
+                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronunciation_add'],
                                                                                   entry[particle_declension]['spelling_add'],
                                                                                   "<"+particle_declension+" Particle>","Special",[particle_declension]))
                     else:
@@ -740,27 +742,27 @@ def parse_grammar_rules(grammar,part_of_speech_set,sound_map_list,patterns):
                                     #entry is a map with a single key
                                     particle_declension = list(entry.keys())[0]
                                     if (entry[particle_declension]): # Test to see if there is anything in the map, otherwise don't add a particle
-                                        if 'pronounciation_regex' in entry[particle_declension]:
-                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
+                                        if 'pronunciation_regex' in entry[particle_declension]:
+                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronunciation_regex']:
                                                 particle_declension = "Vowel " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                                     entry[particle_declension]['t_spelling_add'],
                                                                                     "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                                 particle_declension = "Consonant " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                                     entry[particle_declension]['f_spelling_add'],
                                                                                     "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                             else:
                                                 particle_declension = "Consonant " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                                     entry[particle_declension]['t_spelling_add'],
                                                                                     "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                                 particle_declension = "Vowel " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                                     entry[particle_declension]['f_spelling_add'],
                                                                                     "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                         else:
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
+                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronunciation_add'],
                                                                                 entry[particle_declension]['spelling_add'],
                                                                                 "<"+particle_declension+" Particle>","Special",[particle_declension]))
                 working_affix_map = {}
@@ -821,27 +823,27 @@ def parse_grammar_rules(grammar,part_of_speech_set,sound_map_list,patterns):
                                     for entry in working_affix_map[affix]:
                                         #entry is a map with a single key
                                         particle_declension = list(entry.keys())[0]
-                                        if 'pronounciation_regex' in entry[particle_declension]:
-                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
+                                        if 'pronunciation_regex' in entry[particle_declension]:
+                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronunciation_regex']:
                                                 particle_declension = "Vowel " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                                       entry[particle_declension]['t_spelling_add'],
                                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                                 particle_declension = "Consonant " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                                       entry[particle_declension]['f_spelling_add'],
                                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                             else:
                                                 particle_declension = "Consonant " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                                       entry[particle_declension]['t_spelling_add'],
                                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                                 particle_declension = "Vowel " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                                       entry[particle_declension]['f_spelling_add'],
                                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                         else:
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
+                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronunciation_add'],
                                                                                   entry[particle_declension]['spelling_add'],
                                                                                   "<"+particle_declension+" Particle>","Special",[particle_declension]))
                     else:
@@ -855,27 +857,27 @@ def parse_grammar_rules(grammar,part_of_speech_set,sound_map_list,patterns):
                                     #entry is a map with a single key
                                     particle_declension = list(entry.keys())[0]
                                     if(entry[particle_declension]):
-                                        if 'pronounciation_regex' in entry[particle_declension]:
-                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
+                                        if 'pronunciation_regex' in entry[particle_declension]:
+                                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronunciation_regex']:
                                                 particle_declension = "Vowel " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                                     entry[particle_declension]['t_spelling_add'],
                                                                                     "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                                 particle_declension = "Consonant " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                                     entry[particle_declension]['f_spelling_add'],
                                                                                     "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                             else:
                                                 particle_declension = "Consonant " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                                     entry[particle_declension]['t_spelling_add'],
                                                                                     "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                                 particle_declension = "Vowel " + particle_declension
-                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                                     entry[particle_declension]['f_spelling_add'],
                                                                                     "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                         else:
-                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
+                                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronunciation_add'],
                                                                                 entry[particle_declension]['spelling_add'],
                                                                                 "<"+particle_declension+" Particle>","Special",[particle_declension]))
                     working_affix_map = {}
@@ -954,27 +956,27 @@ def parse_grammar_rules(grammar,part_of_speech_set,sound_map_list,patterns):
                         for entry in working_affix_map[affix]:
                             #entry is a map with a single key
                             particle_declension = list(entry.keys())[0]
-                            if 'pronounciation_regex' in entry[particle_declension]:
-                                if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
+                            if 'pronunciation_regex' in entry[particle_declension]:
+                                if IPA_VOWELS_PATTERN in entry[particle_declension]['pronunciation_regex']:
                                     particle_declension = "Vowel " + particle_declension
-                                    lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                    lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                           entry[particle_declension]['t_spelling_add'],
                                                                           "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                     particle_declension = "Consonant " + particle_declension
-                                    lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                    lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                           entry[particle_declension]['f_spelling_add'],
                                                                           "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                 else:
                                     particle_declension = "Consonant " + particle_declension
-                                    lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                    lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                           entry[particle_declension]['t_spelling_add'],
                                                                           "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                     particle_declension = "Vowel " + particle_declension
-                                    lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                    lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                           entry[particle_declension]['f_spelling_add'],
                                                                           "<"+particle_declension+" Particle>","Special",[particle_declension]))
                             else:
-                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
+                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronunciation_add'],
                                                                       entry[particle_declension]['spelling_add'],
                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
         else:
@@ -987,27 +989,27 @@ def parse_grammar_rules(grammar,part_of_speech_set,sound_map_list,patterns):
                     for entry in working_affix_map[affix]:
                         #entry is a map with a single key
                         particle_declension = list(entry.keys())[0]
-                        if 'pronounciation_regex' in entry[particle_declension]:
-                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronounciation_regex']:
+                        if 'pronunciation_regex' in entry[particle_declension]:
+                            if IPA_VOWELS_PATTERN in entry[particle_declension]['pronunciation_regex']:
                                 particle_declension = "Vowel " + particle_declension
-                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                       entry[particle_declension]['t_spelling_add'],
                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                 particle_declension = "Consonant " + particle_declension
-                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                       entry[particle_declension]['f_spelling_add'],
                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                             else:
                                 particle_declension = "Consonant " + particle_declension
-                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronounciation_add'],
+                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['t_pronunciation_add'],
                                                                       entry[particle_declension]['t_spelling_add'],
                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                                 particle_declension = "Vowel " + particle_declension
-                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronounciation_add'],
+                                lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['f_pronunciation_add'],
                                                                       entry[particle_declension]['f_spelling_add'],
                                                                       "<"+particle_declension+" Particle>","Special",[particle_declension]))
                         else:
-                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronounciation_add'],
+                            lexicon_fragment.append(LEXICON_ENTRY(entry[particle_declension]['pronunciation_add'],
                                                                   entry[particle_declension]['spelling_add'],
                                                                   "<"+particle_declension+" Particle>","Special",[particle_declension]))
 
@@ -1054,11 +1056,11 @@ def parse_affix_rule(affix_rule,sound_map_list,patterns):
         f_spelling_add = spell_word(vowel_prefix_match.group(2),sound_map_list)
         affix_type = 'prefix'
         map_entry = {
-            'pronounciation_regex':'^'+IPA_VOWELS_PATTERN,
+            'pronunciation_regex':'^'+IPA_VOWELS_PATTERN,
             'spelling_regex':'^'+SPELLING_VOWEL_PATTERN,
-            't_pronounciation_add':vowel_prefix_match.group(1),
+            't_pronunciation_add':vowel_prefix_match.group(1),
             't_spelling_add':t_spelling_add,
-            'f_pronounciation_add':vowel_prefix_match.group(2),
+            'f_pronunciation_add':vowel_prefix_match.group(2),
             'f_spelling_add':f_spelling_add
         }
     elif vowel_particle_match:
@@ -1066,11 +1068,11 @@ def parse_affix_rule(affix_rule,sound_map_list,patterns):
         f_spelling_add = spell_word(vowel_particle_match.group(2).strip(),sound_map_list)
         affix_type = 'particle'
         map_entry = {
-            'pronounciation_regex':'^'+IPA_VOWELS_PATTERN,
+            'pronunciation_regex':'^'+IPA_VOWELS_PATTERN,
             'spelling_regex':'^'+SPELLING_VOWEL_PATTERN,
-            't_pronounciation_add':vowel_particle_match.group(1),
+            't_pronunciation_add':vowel_particle_match.group(1),
             't_spelling_add':t_spelling_add,
-            'f_pronounciation_add':vowel_particle_match.group(2),
+            'f_pronunciation_add':vowel_particle_match.group(2),
             'f_spelling_add':f_spelling_add
         }
     elif vowel_suffix_match:
@@ -1078,11 +1080,11 @@ def parse_affix_rule(affix_rule,sound_map_list,patterns):
         f_spelling_add = spell_word(vowel_suffix_match.group(2).strip(),sound_map_list)
         affix_type = 'suffix'
         map_entry = {
-            'pronounciation_regex':IPA_VOWELS_PATTERN+'$',
+            'pronunciation_regex':IPA_VOWELS_PATTERN+'$',
             'spelling_regex':SPELLING_VOWEL_PATTERN+'$',
-            't_pronounciation_add':vowel_suffix_match.group(1),
+            't_pronunciation_add':vowel_suffix_match.group(1),
             't_spelling_add':t_spelling_add,
-            'f_pronounciation_add':vowel_suffix_match.group(2),
+            'f_pronunciation_add':vowel_suffix_match.group(2),
             'f_spelling_add':f_spelling_add
         }
     elif consonant_prefix_match:
@@ -1090,11 +1092,11 @@ def parse_affix_rule(affix_rule,sound_map_list,patterns):
         f_spelling_add = spell_word(consonant_prefix_match.group(2).strip(),sound_map_list)
         affix_type = 'prefix'
         map_entry = {
-            'pronounciation_regex':'^'+IPA_CONSONANT_PATTERN,
+            'pronunciation_regex':'^'+IPA_CONSONANT_PATTERN,
             'spelling_regex':'^'+SPELLING_CONSONANT_PATTERN,
-            't_pronounciation_add':consonant_prefix_match.group(1),
+            't_pronunciation_add':consonant_prefix_match.group(1),
             't_spelling_add':t_spelling_add,
-            'f_pronounciation_add':consonant_prefix_match.group(2),
+            'f_pronunciation_add':consonant_prefix_match.group(2),
             'f_spelling_add':f_spelling_add
         }
     elif consonant_particle_match:
@@ -1102,11 +1104,11 @@ def parse_affix_rule(affix_rule,sound_map_list,patterns):
         f_spelling_add = spell_word(consonant_particle_match.group(2).strip(),sound_map_list)
         affix_type = 'particle'
         map_entry = {
-            'pronounciation_regex':'^'+IPA_CONSONANT_PATTERN,
+            'pronunciation_regex':'^'+IPA_CONSONANT_PATTERN,
             'spelling_regex':'^'+SPELLING_CONSONANT_PATTERN,
-            't_pronounciation_add':consonant_particle_match.group(1),
+            't_pronunciation_add':consonant_particle_match.group(1),
             't_spelling_add':t_spelling_add,
-            'f_pronounciation_add':consonant_particle_match.group(2),
+            'f_pronunciation_add':consonant_particle_match.group(2),
             'f_spelling_add':f_spelling_add
         }
     elif consonant_suffix_match:
@@ -1114,38 +1116,38 @@ def parse_affix_rule(affix_rule,sound_map_list,patterns):
         f_spelling_add = spell_word(consonant_suffix_match.group(2).strip(),sound_map_list)
         affix_type = 'suffix'
         map_entry = {
-            'pronounciation_regex':IPA_CONSONANT_PATTERN+'$',
+            'pronunciation_regex':IPA_CONSONANT_PATTERN+'$',
             'spelling_regex':SPELLING_CONSONANT_PATTERN+'$',
-            't_pronounciation_add':consonant_suffix_match.group(1),
+            't_pronunciation_add':consonant_suffix_match.group(1),
             't_spelling_add':t_spelling_add,
-            'f_pronounciation_add':consonant_suffix_match.group(2),
+            'f_pronunciation_add':consonant_suffix_match.group(2),
             'f_spelling_add':f_spelling_add
         }
     elif prefix_match:
         affix_type = 'prefix'
         map_entry = {
-            'pronounciation_add':prefix_match.group(1),
+            'pronunciation_add':prefix_match.group(1),
             'spelling_add':spell_word(prefix_match.group(1).strip(),sound_map_list),
         }
     elif particle_match:
         affix_type = 'particle'
         map_entry = {
-            'pronounciation_add':particle_match.group(1),
+            'pronunciation_add':particle_match.group(1),
             'spelling_add':spell_word(particle_match.group(1).strip(),sound_map_list),
         }
     elif suffix_match:
         affix_type = 'suffix'
         map_entry = {
-            'pronounciation_add':suffix_match.group(1),
+            'pronunciation_add':suffix_match.group(1),
             'spelling_add':spell_word(suffix_match.group(1).strip(),sound_map_list),
         }
     elif re.match(r'V\(C\)\*#\s+>\s+__',affix_rule):
         affix_type = 'replacement'
         map_entry = {
-            'pronounciation_regex':r'('+IPA_VOWELS_PATTERN+r')('+IPA_CONSONANT_PATTERN+r'+)(\S*)\s*$',
+            'pronunciation_regex':r'('+IPA_VOWELS_PATTERN+r')('+IPA_CONSONANT_PATTERN+r'+)(\S*)\s*$',
             'spelling_regex':r'('+SPELLING_VOWEL_PATTERN+r')('+SPELLING_CONSONANT_PATTERN+r'+)(\S*)\s*$',
-            'pronounciation_repl':'$1$1$2$3',
-            'spelling_repl':'$1$1$2$3'
+            'pronunciation_replacement':'$1$1$2$3',
+            'spelling_replacement':'$1$1$2$3'
         }
     elif affix_rule == '' or affix_rule.strip() == '-':
         affix_type = ''
