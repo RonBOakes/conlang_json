@@ -353,9 +353,10 @@ def spell_word(phonetic, sound_map_list):
     spelled = phonetic
 
     for sound_map in sound_map_list:
-        # Change the regular expression replace/substitute from PERL to Python.
-        romanization = sound_map['romanization'].replace('$','\\')
-        spelled = re.sub(sound_map['spelling_regex'],romanization,spelled)
+        if 'romanization' in sound_map:
+            # Change the regular expression replace/substitute from PERL to Python.
+            romanization = sound_map['romanization'].replace('$','\\')
+            spelled = re.sub(sound_map['spelling_regex'],romanization,spelled)
        
     return spelled.strip()
 #end def spell_word
