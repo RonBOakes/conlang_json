@@ -168,7 +168,27 @@ def main(argv):
     
     # Get the phonetic inventory
     phonetic_inventory = parse_phonetic_inventory(vulgarlang)
+
+    # Get the word_order, adjective_position, and pre_post_position
+    if "wordOrder" in vulgarlang:
+        word_order = vulgarlang["wordOrder"]["radioID"]
+    else:
+        word_order = "SVO"
         
+    if "adjectiveOrder" in vulgarlang:
+        if vulgarlang["adjectiveOrder"]["radioID"] == "beforeAdjOrder":
+            adjective_position = "Before"
+        else:
+            adjective_position = "After"
+    else:
+        adjective_position = "Before"
+   
+    if "prePostPosition" in vulgarlang:
+        pre_post_position = vulgarlang["prePostPosition"]["radioID"]
+    else:
+        pre_post_position = "preposition"
+            
+
     # Build the basic language structure.
     language_structure = {
                             'version':1.0,
@@ -193,6 +213,9 @@ def main(argv):
     language_structure['part_of_speech_list'] = sorted(list(part_of_speech_set))
     language_structure['phoneme_inventory'] = phoneme_inventory
     language_structure['phonetic_inventory'] = phonetic_inventory
+    language_structure['word_order'] = word_order
+    language_structure['adjective_position'] = adjective_position
+    language_structure['pre_post_position'] = pre_post_position
     language_structure['sound_map_list'] = sound_map_list
     language_structure['lexical_order_list'] = lexical_order_list
     language_structure['affix_map'] = affix_map
