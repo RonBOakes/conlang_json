@@ -215,7 +215,7 @@ def derive_words(derived_word_list,derivational_affix_map,lexicon,affix_map,soun
     word_map = {}
     word_map_tupple = {}
 
-    # Build the word map and word map tupple from the passed in lexicon.
+    # Build the word map and word map tuple from the passed in lexicon.
     for raw_entry in lexicon:
         # Ensure that the entry is a LEXICON_ENTRY
         if isinstance(raw_entry,dict):

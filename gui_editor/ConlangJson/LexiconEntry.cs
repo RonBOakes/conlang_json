@@ -16,13 +16,8 @@
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace ConlangJson
 {
@@ -30,15 +25,8 @@ namespace ConlangJson
     /// Defines the .NET/C# structure that corresponds to the individual lexicon entries.  Each object
     /// will encapsulate a single word in the lexicon.
     /// </summary>
-    public class LexiconEntry : IEquatable<LexiconEntry?>
+    public sealed class LexiconEntry : IEquatable<LexiconEntry>
     {
-        private string _phonetic;
-        private string _spelled;
-        private string _english;
-        private string _part_of_speech;
-        private List<string> _declensions = [];
-        private bool? _derived_word;
-        private bool? _declined_word;
         private JsonObject? _metadata;
 
         private static List<string>? _lexicalOrderList;
@@ -70,13 +58,13 @@ namespace ConlangJson
         /// to update their content.<br/>Optional, Recommended.</param>
         public LexiconEntry(string phonetic, string spelled, string english, string part_of_speech, List<string> declensions, bool? derived_word, bool? declined_word, JsonObject? metadata)
         {
-            this._phonetic = phonetic;
-            this._spelled = spelled;
-            this._english = english;
-            this._part_of_speech = part_of_speech;
-            this._declensions = declensions;
-            this._derived_word = derived_word;
-            this._declined_word = declined_word;
+            this.phonetic = phonetic;
+            this.spelled = spelled;
+            this.english = english;
+            this.part_of_speech = part_of_speech;
+            this.declensions = declensions;
+            this.derived_word = derived_word;
+            this.declined_word = declined_word;
             this._metadata = metadata;
         }
 
@@ -85,13 +73,13 @@ namespace ConlangJson
         /// </summary>
         public LexiconEntry()
         {
-            _phonetic = "";
-            _spelled = "";
-            _english = "";
-            _part_of_speech = "";
-            _declensions = [];
-            _derived_word = false;
-            _declined_word = false;
+            phonetic = "";
+            spelled = "";
+            english = "";
+            part_of_speech = "";
+            declensions = [];
+            derived_word = false;
+            declined_word = false;
         }
 
         /// <summary>
@@ -99,72 +87,60 @@ namespace ConlangJson
         /// representation of the word.  This will be expressed using the symbology specified in the phonetic_characters
         /// field at the Top Level.<br/> Optional.  Required if spelled is not present.
         /// </summary>
-        public string phonetic
-        {
-            get { return _phonetic; }
-            set { _phonetic = value; }
-        }
+#pragma warning disable IDE1006 // Naming Styles
+        public string phonetic { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 
         /// <summary>
         /// This string contains the Romanized or Latinized representation of the word.<br/> Optional. 
         /// Required if phonetic is not present.
         /// </summary>
-        public string spelled
-        { 
-            get { return _spelled; } 
-            set { _spelled = value; } 
-        }
+#pragma warning disable IDE1006 // Naming Styles
+        public string spelled { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 
         /// <summary>
         /// This string contains the English or other natural language equivalent to the word or its 
         /// definition in English or another natural language.<br/>Required.
         /// </summary>
-        public string english
-        { 
-            get { return _english; } 
-            set { _english = value; } 
-        }
+#pragma warning disable IDE1006 // Naming Styles
+        public string english { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 
         /// <summary>
         /// This string contains the part of speech for this word.  This can, and should, be 
         /// one of the abbreviations found in the part_of_speech_list field at the Top Level.<br/>Required.
         /// </summary>
+#pragma warning disable IDE1006 // Naming Styles
         public string part_of_speech
-        {
-            get { return _part_of_speech; }
-            set { _part_of_speech = value; }
-        }
+#pragma warning restore IDE1006 // Naming Styles
+        { get; set; }
 
         /// <summary>
         /// This array of strings contains the declensions used when declining this word from 
         /// its root form.  If the word is not declined, that is, if it is the root word, this array must contain a single 
         /// entry, the string "root."<br/>Required.
         /// </summary>
-        public List<string> declensions
-        { 
-            get { return _declensions; } 
-            set { _declensions = value; } 
-        }
+#pragma warning disable IDE1006 // Naming Styles
+        public List<string> declensions { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 
         /// <summary>
         /// This boolean is set to true if this word was created by deriving a root word using 
         /// words in the derived_word_list with the aid of the affixes in the derivation_affix_map}.<br/>Required.
         /// </summary>
-        public bool? derived_word 
-        { 
-            get { return _derived_word; } 
-            set { _derived_word = value; } 
-        }
+#pragma warning disable IDE1006 // Naming Styles
+        public bool? derived_word { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 
         /// <summary>
         /// This boolean is set to true if the word was created by declining a root word using 
         /// the rules in the affix_map.<br/>Required.
         /// </summary>
+#pragma warning disable IDE1006 // Naming Styles
         public bool? declined_word
-        {
-            get { return _declined_word; }
-            set { _declined_word = value; }
-        }
+#pragma warning restore IDE1006 // Naming Styles
+        { get; set; }
 
         /// <summary>
         /// This object contains an object where any program that edits the conlang object may 
@@ -172,7 +148,9 @@ namespace ConlangJson
         /// for this.  Programs should not delete or alter metadata created by other programs but may add their 
         /// own metadata or alter their metadata to update their content.<br/>Optional, Recommended.
         /// </summary>
+#pragma warning disable IDE1006 // Naming Styles
         public JsonObject metadata
+#pragma warning restore IDE1006 // Naming Styles
         {
             get
             {
@@ -202,10 +180,12 @@ namespace ConlangJson
         /// <summary>
         /// Performs a shallow copy of the LexiconEntry object.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A new LexiconEntry with the same data.</returns>
+#pragma warning disable IDE1006 // Naming Styles
         public LexiconEntry copy()
+#pragma warning restore IDE1006 // Naming Styles
         {
-            LexiconEntry copy = new LexiconEntry(phonetic, spelled, english, part_of_speech, declensions, derived_word, declined_word, metadata);
+            LexiconEntry copy = new(phonetic, spelled, english, part_of_speech, declensions, derived_word, declined_word, metadata);
             if (metadata != null)
             {
                 string metadataString = JsonSerializer.Serialize<JsonObject>(metadata);
@@ -223,7 +203,15 @@ namespace ConlangJson
         /// <returns>true if the objects are the same, false otherwise.</returns>
         public override bool Equals(object? obj)
         {
-            return Equals(obj as LexiconEntry);
+            return obj is LexiconEntry entry &&
+                phonetic == entry.phonetic &&
+                   spelled == entry.spelled &&
+                   english == entry.english &&
+                   part_of_speech == entry.part_of_speech &&
+                   EqualityComparer<List<string>>.Default.Equals(declensions, entry.declensions) &&
+                   derived_word == entry.derived_word &&
+                   declined_word == entry.declined_word &&
+                   EqualityComparer<JsonObject?>.Default.Equals(_metadata, entry._metadata);
         }
 
         /// <summary>
@@ -235,13 +223,13 @@ namespace ConlangJson
         public bool Equals(LexiconEntry? other)
         {
             return other is not null &&
-                   _phonetic == other._phonetic &&
-                   _spelled == other._spelled &&
-                   _english == other._english &&
-                   _part_of_speech == other._part_of_speech &&
-                   EqualityComparer<List<string>>.Default.Equals(_declensions, other._declensions) &&
-                   _derived_word == other._derived_word &&
-                   _declined_word == other._declined_word &&
+                   phonetic == other.phonetic &&
+                   spelled == other.spelled &&
+                   english == other.english &&
+                   part_of_speech == other.part_of_speech &&
+                   EqualityComparer<List<string>>.Default.Equals(declensions, other.declensions) &&
+                   derived_word == other.derived_word &&
+                   declined_word == other.declined_word &&
                    EqualityComparer<JsonObject?>.Default.Equals(_metadata, other._metadata);
         }
 
@@ -249,9 +237,11 @@ namespace ConlangJson
         /// Generates a hash code for a LexiconEntry object based on its data.
         /// </summary>
         /// <returns>Hash Code for this LexiconEntry object.</returns>
+#pragma warning disable S2328 // "GetHashCode" should not reference mutable fields
         public override int GetHashCode()
+#pragma warning restore S2328 // "GetHashCode" should not reference mutable fields
         {
-            return HashCode.Combine(_phonetic, _spelled, _english, _part_of_speech, _declensions, _derived_word, _declined_word, _metadata);
+            return HashCode.Combine(phonetic, spelled, english, part_of_speech, declensions, derived_word, declined_word, _metadata);
         }
 
         /// <summary>
@@ -269,7 +259,7 @@ namespace ConlangJson
             /// <exception cref="NotSupportedException">If either supplied object is null.</exception>
             public int Compare(LexiconEntry? x, LexiconEntry? y)
             {
-                if(x == null || y == null)
+                if (x == null || y == null)
                 {
                     throw new NotSupportedException();
                 }
@@ -290,7 +280,9 @@ namespace ConlangJson
                 }
             }
 
-            private double lexicalIndex(string item)
+#pragma warning disable IDE1006 // Naming Styles
+            private static double lexicalIndex(string item)
+#pragma warning restore IDE1006 // Naming Styles
             {
                 item = item.ToLower();
 
@@ -321,9 +313,9 @@ namespace ConlangJson
                         charPos += 1;
                     }
 
-                    if ((evalChar != "ˈ") && ((evalChar != " ")))
+                    if ((evalChar != "ˈ") && evalChar != " ")
                     {
-                        retVal += lexicalValue(evalChar) * Math.Pow(10.0, (double)charIndex);
+                        retVal += lexicalValue(evalChar) * Math.Pow(10.0, charIndex);
                     }
                 }
 
@@ -331,11 +323,13 @@ namespace ConlangJson
                 return retVal;
             }
 
-            private double lexicalValue(string value)
+#pragma warning disable IDE1006 // Naming Styles
+            private static double lexicalValue(string value)
+#pragma warning restore IDE1006 // Naming Styles
             {
-                string charBase = value.Substring(0, 1);
+                string charBase = value[..1];
                 double lexVal;
-                if(LexicalOrderList.Contains(value))
+                if (LexicalOrderList.Contains(value))
                 {
                     int index = 0;
                     foreach (string s in LexicalOrderList)
@@ -346,11 +340,11 @@ namespace ConlangJson
                         }
                         index++;
                     }
-                    lexVal = index * 100.0 ;
+                    lexVal = index * 100.0;
                     if (value.Length > 1)
                     {
-                        string diacritic = value.Substring(1);
-                        lexVal += Math.Round(((double)(diacritic[0] - '\u0300')) / (double)('\u036f' - '\u0300')); ;
+                        string diacritic = value[..1];
+                        lexVal += Math.Round((diacritic[0] - '\u0300') / (double)('\u036f' - '\u0300'));
                     }
                 }
                 else
@@ -377,7 +371,7 @@ namespace ConlangJson
             /// <exception cref="NotSupportedException">If either supplied object is null.</exception>
             int IComparer<LexiconEntry>.Compare(LexiconEntry? x, LexiconEntry? y)
             {
-                if(x == null || y == null)
+                if (x == null || y == null)
                 {
                     throw new NotSupportedException();
                 }
